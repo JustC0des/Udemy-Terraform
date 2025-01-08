@@ -1,0 +1,14 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "${bucket_arn}"
+            ]
+        }
+    ],
+    "Version": "2012-10-17"
+}
