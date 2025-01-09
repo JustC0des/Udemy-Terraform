@@ -1,0 +1,68 @@
+name: Terraform AWS Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Terraform Init, Validate, Plan, Infracost, Checkov, and Apply
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VERSION: 1.3.0
+      INFRACOST_VERSION: 0.9.5
+      CHECKOV_VERSION: 2.0.989
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2  # Update to your preferred AWS region
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=plan.tfplan
+
+      - name: Setup Infracost
+        run: |
+          curl -sL https://github.com/infracost/infracost/releases/download/v${{ env.INFRACOST_VERSION }}/infracost-linux-amd64.tar.gz | tar xz -C /usr/local/bin
+          infracost register --api-key ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Run Infracost
+        run: infracost breakdown --path plan.tfplan --format json --out-file infracost.json
+
+      - name: Upload Infracost Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: infracost-report
+          path: infracost.json
+
+      - name: Setup Checkov
+        run: pip install checkov==${{ env.CHECKOV_VERSION }}
+
+      - name: Run Checkov
+        run: checkov -d .
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve plan.tfplan
