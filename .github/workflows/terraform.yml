@@ -3,10 +3,12 @@ name: Terraform AWS Workflow
 on:
   push:
     branches:
-      - main
+      - dev
+      - qas
+      - prd
   pull_request:
     branches:
-      - main
+      - dev
 
 jobs:
   terraform:
