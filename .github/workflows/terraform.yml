@@ -46,9 +46,11 @@ jobs:
         run: terraform plan -out=plan.tfplan
 
       - name: Setup Infracost
-        run: |
-          curl -sL https://github.com/infracost/infracost/releases/download/v${{ env.INFRACOST_VERSION }}/infracost-linux-amd64.tar.gz | tar xz -C /usr/local/bin
-          infracost register --api-key ${{ secrets.INFRACOST_API_KEY }}
+        uses: infracost/actions/setup@v3
+        # See https://github.com/infracost/actions/tree/master/setup for other inputs
+        # If you can't use this action, use Docker image infracost/infracost:ci-0.10
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       - name: Run Infracost
         run: infracost breakdown --path plan.tfplan --format json --out-file infracost.json
