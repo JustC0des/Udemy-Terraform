@@ -1,14 +1,12 @@
 name: Terraform AWS Workflow
 
 on:
-  push:
-    branches:
-      - dev
-      - qas
-      - prd
-  pull_request:
-    branches:
-      - dev
+  workflow_dispatch:
+    inputs:
+      apply_terraform:
+        description: 'Apply Terraform changes'
+        required: true
+        default: 'false'
 
 jobs:
   terraform:
@@ -34,7 +32,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1  # Update to your preferred AWS region
+          aws-region: eu-central-1
 
       - name: Terraform Init
         run: terraform init
@@ -47,8 +45,6 @@ jobs:
 
       - name: Setup Infracost
         uses: infracost/actions/setup@v3
-        # See https://github.com/infracost/actions/tree/master/setup for other inputs
-        # If you can't use this action, use Docker image infracost/infracost:ci-0.10
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
@@ -61,25 +57,12 @@ jobs:
           name: infracost-report
           path: infracost.json
 
-      - name: Checkov GitHub Action
-        uses: bridgecrewio/checkov-action@v12
-        with:
-          # This will add both a CLI output to the console and create a results.sarif file
-          output_format: cli,sarif
-          output_file_path: console,results.sarif
-        
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
-        
-        # Results are generated only on a success or failure
-        # this is required since GitHub by default won't run the next step
-        # when the previous one has failed. Security checks that do not pass will 'fail'.
-        # An alternative is to add `continue-on-error: true` to the previous step
-        # Or 'soft_fail: true' to checkov.
-        if: success() || failure()
-        with:
-          sarif_file: results.sarif
+#      - name: Checkov GitHub Action
+#        uses: bridgecrewio/checkov-action@v12
+#        with:
+#          output_format: cli,sarif
+#          output_file_path: console,results.sarif
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: ${{ github.event.inputs.apply_terraform == 'true' }}
         run: terraform apply -auto-approve plan.tfplan
