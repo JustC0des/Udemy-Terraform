@@ -1,8 +1,8 @@
 variable "rds_user" {
-    type = string
+  type = string
 }
 
 variable "rds_passwort" {
-  type = string
+  type      = string
   sensitive = true
 }
