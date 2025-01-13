@@ -71,9 +71,11 @@ jobs:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
           
       - name: Run Infracost
+         working-directory: ./07_vcs
         run: infracost breakdown --path terraform.tfplan --format json --out-file infracost.json
 
       - name: Artefakte hochladen
+         working-directory: ./07_vcs
         uses: actions/upload-artifact@v3
         with:
           name: infracost-report
@@ -85,4 +87,4 @@ jobs:
 
       - name: Terraform destroy
         working-directory: ./07_vcs
-        run: terraform apply -destroy
+        run: terraform apply -destroy -auto-approve
