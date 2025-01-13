@@ -61,4 +61,8 @@ jobs:
 
       - name: Terraform plan
         working-directory: ./07_vcs
-        run: terraform workspace select dev && terraform plan -out=terraform.tfplan
+        run: terraform workspace select ${{ github.ref_name }} && terraform plan -out=terraform.tfplan
+
+      - name: Terraform apply
+        working-directory: ./07_vcs
+        run: terraform apply terraform.tfplan
