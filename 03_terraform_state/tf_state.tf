@@ -1,9 +1,9 @@
 terraform {
-    backend "s3" {
-        bucket = "test-udemy-12-11-2024"
-        key = "terraform_state/state"
-        region = "eu-central-1"
-    }
+  backend "s3" {
+    bucket = "test-udemy-12-11-2024"
+    key    = "terraform_state/state"
+    region = "eu-central-1"
+  }
 }
 
 data "aws_vpc" "default" {
@@ -36,7 +36,7 @@ resource "aws_vpc_security_group_egress_rule" "example" {
 resource "aws_instance" "example" {
   ami           = "ami-0eddb4a4e7d846d6f"
   instance_type = "t3.micro"
-  subnet_id = data.aws_subnet.eu-central-1a.id
+  subnet_id     = data.aws_subnet.eu-central-1a.id
 
   tags = {
     Name = "ExampleInstance"
@@ -44,9 +44,9 @@ resource "aws_instance" "example" {
 }
 
 resource "aws_ebs_volume" "my_ebs_volume" {
-  availability_zone = "eu-central-1a" 
+  availability_zone = "eu-central-1a"
   size              = 10
-  type       = "gp3"
+  type              = "gp3"
   tags = {
     Name = "my_ebs_volume"
   }

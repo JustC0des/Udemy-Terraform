@@ -27,5 +27,5 @@ resource "aws_vpc_security_group_egress_rule" "example" {
 
 data "aws_instances" "new" {
   instance_state_names = ["running"]
-#   depends_on = [ aws_instance.example ]
+  #   depends_on = [ aws_instance.example ]
 }

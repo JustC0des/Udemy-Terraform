@@ -4,8 +4,8 @@ resource "aws_iam_instance_profile" "example" {
 }
 
 resource "aws_iam_role" "ec2_role" {
-  name        = "ec2-role"
-  description = "Role for ec2 instance"
+  name               = "ec2-role"
+  description        = "Role for ec2 instance"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -26,7 +26,7 @@ EOF
 resource "aws_iam_policy" "ec2_role" {
   name        = "ec2-policy"
   description = "My test policy for ec2"
-  policy = <<EOF
+  policy      = <<EOF
 {
   "Version": "2012-10-17",
   "Statement" : [
