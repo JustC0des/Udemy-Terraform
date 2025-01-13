@@ -63,10 +63,26 @@ jobs:
         working-directory: ./07_vcs
         run: terraform workspace select ${{ github.ref_name }} && terraform plan -out=terraform.tfplan
 
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        # See https://github.com/infracost/actions/tree/master/setup for other inputs
+        # If you can't use this action, use Docker image infracost/infracost:ci-0.10
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+          
+      - name: Run Infracost
+        run: infracost breakdown --path terraform.tfplan --format json --out-file infracost.json
+
+      - name: Artefakte hochladen
+        uses: actions/upload-artifact@v3
+        with:
+          name: infracost-report
+          path: infracost.json      
+
       - name: Terraform apply
         working-directory: ./07_vcs
         run: terraform apply terraform.tfplan
 
       - name: Terraform destroy
         working-directory: ./07_vcs
-        run: terraform apply -destroy terraform.tfplan
+        run: terraform apply -destroy
