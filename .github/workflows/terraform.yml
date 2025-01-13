@@ -61,4 +61,4 @@ jobs:
 
       - name: Terraform plan
         working-directory: ./07_vcs
-        run: terraform plan
+        run: terraform workspace select dev && terraform plan -out=terraform.tfplan
