@@ -48,13 +48,17 @@ jobs:
         run: cd ${{ github.workspace }}/07_vcs
           
       - name: Terraform Init
+        working-directory: ./07_vcs
         run: terraform init
 
       - name: Terraform validate
+        working-directory: ./07_vcs
         run: terraform validate
 
       - name: Terraform format
+        working-directory: ./07_vcs
         run: terraform fmt --check --recursive
 
       - name: Terraform plan
+        working-directory: ./07_vcs
         run: terraform plan
