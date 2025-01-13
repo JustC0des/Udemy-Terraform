@@ -66,3 +66,7 @@ jobs:
       - name: Terraform apply
         working-directory: ./07_vcs
         run: terraform apply terraform.tfplan
+
+      - name: Terraform destroy
+        working-directory: ./07_vcs
+        run: terraform apply -destroy terraform.tfplan
