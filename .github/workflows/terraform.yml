@@ -45,16 +45,45 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
       - name: Checkout in das Repository
-        run: cd ${{ github.workspace }}
+        run: cd ${{ github.workspace }}/07_vcs
           
       - name: Terraform Init
+        working-directory: ./07_vcs
         run: terraform init
 
       - name: Terraform validate
+        working-directory: ./07_vcs
         run: terraform validate
 
       - name: Terraform format
+        working-directory: ./07_vcs
         run: terraform fmt --check --recursive
 
       - name: Terraform plan
-        run: terraform plan
+        working-directory: ./07_vcs
+        run: terraform workspace select ${{ github.ref_name }} && terraform plan -out=terraform.tfplan
+
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        # See https://github.com/infracost/actions/tree/master/setup for other inputs
+        # If you can't use this action, use Docker image infracost/infracost:ci-0.10
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+          
+      - name: Run Infracost
+        working-directory: ./07_vcs
+        run: infracost breakdown --path terraform.tfplan --format json --out-file infracost.json
+
+      - name: Artefakte hochladen
+        uses: actions/upload-artifact@v3
+        with:
+          name: infracost-report
+          path: 07_vcs/infracost.json      
+
+      - name: Terraform apply
+        working-directory: ./07_vcs
+        run: terraform apply terraform.tfplan
+
+      - name: Terraform destroy
+        working-directory: ./07_vcs
+        run: terraform apply -destroy -auto-approve
